@@ -15,6 +15,7 @@ function App() {
   const [food, setFood] = useState(0);
   const [healthcare, setHealthcare] = useState(0);
   const [entertainment, setEntertainment] = useState(0);
+  const [status, setStatus] = useState("Don't Be Broke");
 
   ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -57,6 +58,11 @@ function App() {
     []
   );
 
+  async function statusUpdate() {
+    setStatus("Please fill all fields");
+    setTimeout(() => setStatus("Don't Be Broke"), 3000);
+  }
+
   useEffect(() => {
     // Update localData when data changes
     setLocalData(data);
@@ -98,78 +104,93 @@ function App() {
 
   if (localData.length > 0) {
     paragraphElements = localData.map((item, index) => (
-      <div className="flex flex-row justify-between md:text-2xl sm:text-lg">
-        <p className="w-[20%] text-center" key={index}>
-          {item.item}
-        </p>
-        <p className=" w-[20%] text-center" key={index}>
-          {item.category}
-        </p>
-        {/* <div className="flex flex-row"> */}
-        <p className=" w-[20%] text-center" key={index}>
-          {item.amount}
-        </p>
-        {/* <button className=""
+      <div className="flex py-2">
+        <div className="flex flex-row justify-between md:text-2xl sm:text-lg w-[95%]">
+          <p className="w-[20%] text-center" key={index}>
+            {item.item}
+          </p>
+          <p className=" w-[20%] text-center" key={index}>
+            {item.category}
+          </p>
+          <p className=" w-[20%] text-center" key={index}>
+            {item.amount}
+          </p>
+        </div>
+        <div className="w-[5%] flex justify-center items-center">
+          <button
+            className=""
             onClick={async () => {
               await removeDataFromLocalStorage(index);
             }}
           >
             X
-          </button> */}
-        {/* </div> */}
+          </button>
+        </div>
       </div>
     ));
+  } else {
+    paragraphElements = (
+      <div className="px-4 md:text-3xl text-xl text-center">
+        Add new entries to get list here
+      </div>
+    );
   }
 
-  const handleAddNew = () => {
-    const newItem = {
-      category,
-      item,
-      amount: parseInt(amount),
-    };
+  const handleAddNew = async () => {
+    if (category && item && amount) {
+      const newItem = {
+        category,
+        item,
+        amount: parseInt(amount),
+      };
 
-    if (data) {
-      data.push(newItem);
-      localStorage.setItem("expense", JSON.stringify(data));
+      if (data) {
+        data.push(newItem);
+        localStorage.setItem("expense", JSON.stringify(data));
+      } else {
+        localStorage.setItem("expense", JSON.stringify([newItem]));
+      }
+
+      const housingTotal = localData.reduce(
+        (total, expense) =>
+          expense.category === "housing" ? total + expense.amount : total,
+        0
+      );
+      const transportationTotal = localData.reduce(
+        (total, expense) =>
+          expense.category === "transportation"
+            ? total + expense.amount
+            : total,
+        0
+      );
+      const foodTotal = localData.reduce(
+        (total, expense) =>
+          expense.category === "food" ? total + expense.amount : total,
+        0
+      );
+      const healthcareTotal = localData.reduce(
+        (total, expense) =>
+          expense.category === "healthcare" ? total + expense.amount : total,
+        0
+      );
+      const entertainmentTotal = localData.reduce(
+        (total, expense) =>
+          expense.category === "entertainment" ? total + expense.amount : total,
+        0
+      );
+
+      setHousing(housingTotal);
+      setTransportation(transportationTotal);
+      setFood(foodTotal);
+      setHealthcare(healthcareTotal);
+      setEntertainment(entertainmentTotal);
+
+      setItem("");
+      setCategory("housing");
+      setAmount("");
     } else {
-      localStorage.setItem("expense", JSON.stringify([newItem]));
+      await statusUpdate();
     }
-
-    const housingTotal = localData.reduce(
-      (total, expense) =>
-        expense.category === "housing" ? total + expense.amount : total,
-      0
-    );
-    const transportationTotal = localData.reduce(
-      (total, expense) =>
-        expense.category === "transportation" ? total + expense.amount : total,
-      0
-    );
-    const foodTotal = localData.reduce(
-      (total, expense) =>
-        expense.category === "food" ? total + expense.amount : total,
-      0
-    );
-    const healthcareTotal = localData.reduce(
-      (total, expense) =>
-        expense.category === "healthcare" ? total + expense.amount : total,
-      0
-    );
-    const entertainmentTotal = localData.reduce(
-      (total, expense) =>
-        expense.category === "entertainment" ? total + expense.amount : total,
-      0
-    );
-
-    setHousing(housingTotal);
-    setTransportation(transportationTotal);
-    setFood(foodTotal);
-    setHealthcare(healthcareTotal);
-    setEntertainment(entertainmentTotal);
-
-    setItem("");
-    setCategory("housing");
-    setAmount("");
   };
   const catDrop = categories.map((category) => (
     <option value={category}>{category}</option>
@@ -271,24 +292,57 @@ function App() {
   }
 
   return (
-    <div className=" bg-black min-h-screen">
+    <div className=" bg-black min-h-screen" style={{ fontFamily: "Agbalumo" }}>
       <div className="mx-auto flex flex-col px-6 bg-dots bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-pink-600 to-purple-500 ">
-        <p className="text-center font-bold animated-gradient md:text-7xl text-4xl mt-6 mb-2">
-          Don't Be Broke
-        </p>
+        <div className="flex flex-row md:px-6 justify-between md:pr-0">
+          <div className="flex items-start justify-start">
+            <p className="text-center font-bold animated-gradient md:text-7xl text-4xl mt-6 mb-2">
+              {status}
+            </p>
+          </div>
+          <div className="flex justify-end items-end">
+            <div
+              className={`${
+                localData.length > 0 ? "block" : "hidden"
+              } flex items-center justify-center py-4 md:px-4`}
+            >
+              <button
+                className="md:text-lg text-sm md:h-10  rounded-lg border-purple-500 text-purple-500 border-2 md:w-28 w-24 text-center pb-1"
+                onClick={async () => await exportLocalStorageToCSV()}
+              >
+                Export Data
+              </button>
+            </div>
+            <div
+              className={`${
+                localData.length > 0 ? "hidden" : "block"
+              } flex items-center justify-center py-4 md:px-4`}
+            >
+              <button
+                className="md:text-lg text-sm md:h-10  rounded-lg border-purple-500 text-purple-500 border-2 md:w-28 w-24 text-center pb-1"
+                onClick={async () => {
+                  await importCSVFromExplorerAndStoreInLocalStorage();
+                }}
+              >
+                Import Data
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* <div className="w-[90%] md:w-[30%] ">
         <Doughnut data={chartData} />
       </div> */}
-        <div className="flex-row flex items-center justify-between md:p-4 my-6">
+        <div className="flex-row flex items-center justify-between md:p-4 my-6 text-lg md:text-xl">
           <input
             type="text"
             placeholder="Item"
-            className="md:w-[30%] w-[25%] h-10 border-2 rounded-lg text-center p-[0.4%] text-orange-500 placeholder-orange-500 border-orange-500 bg-black "
+            className="md:w-[30%] w-[25%] h-10 border-2 rounded-lg text-center text-orange-500 placeholder-orange-500 border-orange-500 bg-black pb-1"
             value={item}
             onChange={(e) => setItem(e.target.value)}
           />
           <select
-            className="md:w-[30%] w-[27%] h-10 border-2 rounded-lg text-center p-[0.4%] text-pink-500 border-pink-600 bg-black"
+            className="md:w-[30%] w-[27%] h-10 border-2 rounded-lg text-center text-pink-500 border-pink-600 bg-black pb-1"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -297,13 +351,13 @@ function App() {
           <input
             type="text"
             placeholder="Amount"
-            className="w-[20%] h-10 border-2 rounded-lg text-center p-[0.4%] text-purple-500 placeholder-purple-500 border-purple-500 bg-black"
+            className="w-[20%] h-10 border-2 rounded-lg text-center text-purple-500 placeholder-purple-500 border-purple-500 bg-black pb-1"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
           <button
-            className="text-lg h-10  p-[0.4%] px-1 rounded-lg border-purple-500 tex-purple-500  border-2 md:w-28 w-fit"
-            onClick={handleAddNew}
+            className="text-lg h-10 px-1 rounded-lg border-purple-500 tex-purple-500 border-2 md:w-28 w-fit pb-1"
+            onClick={async () => await handleAddNew()}
           >
             Add new
           </button>
@@ -311,41 +365,13 @@ function App() {
         <div
           className={`${
             localData.length > 0 ? "block" : "hidden"
-          } flex flex-row justify-between font-bold text-center md:text-3xl sm:text-xl`}
+          } flex flex-row justify-between font-bold text-center md:text-3xl sm:text-xl w-[95%]`}
         >
           <p className="w-[20%] text-center">Items</p>
           <p className="w-[20%] text-center">Category</p>
           <p className="w-[20%] text-center">Amount</p>
         </div>
         {paragraphElements}
-      </div>
-      <div className="flex flex-row items-center justify-center">
-        <div
-          className={`${
-            localData.length > 0 ? "block" : "hidden"
-          } flex items-center justify-center py-4 px-4`}
-        >
-          <button
-            className="text-lg h-10 rounded-lg border-purple-500 text-purple-500  border-2 md:w-28 w-fit text-center"
-            onClick={async () => await exportLocalStorageToCSV()}
-          >
-            Export Data
-          </button>
-        </div>
-        <div
-          className={`${
-            localData.length > 0 ? "hidden" : "block"
-          } flex items-center justify-center py-4 px-4`}
-        >
-          <button
-            className="text-lg h-10 rounded-lg border-purple-500 text-purple-500  border-2 md:w-28 w-fit text-center"
-            onClick={async () => {
-              await importCSVFromExplorerAndStoreInLocalStorage();
-            }}
-          >
-            Import Data
-          </button>
-        </div>
       </div>
     </div>
   );
