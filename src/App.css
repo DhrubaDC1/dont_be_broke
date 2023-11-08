@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .App {
   text-align: center;
 }
@@ -35,4 +39,23 @@
   to {
     transform: rotate(360deg);
   }
+}
+@keyframes moveGradient {
+  0% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: -400% 0;
+  }
+}
+
+.animate-gradient {
+  animation: moveGradient 3s linear infinite;
+}
+.animated-gradient {
+  background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(90deg, #ffa500, #ff6b6b, #8a2be2);
+  background-size: 200% 100%;
+  animation: moveGradient 20s linear infinite;
 }
