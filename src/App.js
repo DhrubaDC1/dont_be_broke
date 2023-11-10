@@ -142,6 +142,7 @@ function App() {
         category,
         item,
         amount: parseInt(amount),
+        date: new Date(),
       };
 
       if (data) {
@@ -238,7 +239,7 @@ function App() {
 
         // Process the CSV data and store it in local storage (same code as before)
         const lines = csvString.split("\n");
-        const data = [];
+        let data = [];
         const headers = lines[0].split(",");
 
         for (let i = 1; i < lines.length; i++) {
@@ -251,7 +252,11 @@ function App() {
             data.push(item);
           }
         }
-
+        let existingData = JSON.parse(localStorage.getItem("expense"));
+        for (let key in existingData) {
+          data.push(existingData[key]);
+        }
+        data = data.reverse();
         // Store the imported data in local storage under the "expense" key
         localStorage.setItem("expense", JSON.stringify(data));
 
@@ -300,12 +305,8 @@ function App() {
               {status}
             </p>
           </div>
-          <div className="flex justify-end items-end">
-            <div
-              className={`${
-                localData.length > 0 ? "block" : "hidden"
-              } flex items-center justify-center py-4 md:px-4`}
-            >
+          <div className="flex justify-end items-end flex-col pt-2">
+            <div className={` flex items-center justify-center py-2 md:px-4`}>
               <button
                 className="md:text-lg text-sm md:h-10  rounded-lg border-purple-500 text-purple-500 border-2 md:w-28 w-24 text-center pb-1"
                 onClick={async () => await exportLocalStorageToCSV()}
@@ -313,11 +314,7 @@ function App() {
                 Export Data
               </button>
             </div>
-            <div
-              className={`${
-                localData.length > 0 ? "hidden" : "block"
-              } flex items-center justify-center py-4 md:px-4`}
-            >
+            <div className={`flex items-center justify-center py-2 md:px-4`}>
               <button
                 className="md:text-lg text-sm md:h-10  rounded-lg border-purple-500 text-purple-500 border-2 md:w-28 w-24 text-center pb-1"
                 onClick={async () => {
